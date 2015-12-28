@@ -1,7 +1,7 @@
 # First analysis script
 
-# file extracted from a gzipped file at URL: https://dumps.wikimedia.org/other/pagecounts-all-sites/2015/2015-11/pagecounts-20151101-060000.gz
-pagecounts.20151101.060000 <- read.csv2("pagecounts-20151101-060000", header=FALSE, row.names=NULL, sep="", stringsAsFactors=FALSE)
+# data extracted directly from downloaded gzipped file at URL: https://dumps.wikimedia.org/other/pagecounts-all-sites/2015/2015-11/pagecounts-20151101-060000.gz
+pagecounts.20151101.060000 <- read.csv2(gzfile("pagecounts-20151101-060000.gz"), header=FALSE, row.names=NULL, sep="", stringsAsFactors=FALSE)# load csv file derived from the source code of URL: https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Medicine/Lists_of_pages/Articles
 # load csv file derived from the source code of URL: https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Medicine/Lists_of_pages/Articles
 wikiproject_medicine <- read.csv2("wikiproject_medicine.csv", header=FALSE, stringsAsFactors=FALSE)
 # join both dataframes (rough solution to cope with default names - TO DO: rename fields)
