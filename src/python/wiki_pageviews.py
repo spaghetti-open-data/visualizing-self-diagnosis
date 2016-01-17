@@ -2,6 +2,9 @@
 
 		Python requirements:
 			- pip pip install mwviews
+
+		References:
+			- https://github.com/mediawiki-utilities/python-mwviews
 """
 
 from mwviews.api import PageviewsClient

@@ -5,6 +5,12 @@
 
 		Python requirements:
 			- pip install wikipedia
+
+		References:
+			- http://wikipedia.readthedocs.org/en/latest/quickstart.html
+			- http://wikipedia.readthedocs.org/en/latest/code.html#api
+			- http://www.compjour.org/tutorials/exploring-wikipedia-api-via-python
+
 """
 
 import os
