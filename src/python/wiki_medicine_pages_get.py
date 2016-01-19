@@ -23,6 +23,7 @@ from pprint import pformat
 
 
 def getPageData(pagetitle, pages):
+	# &prop=langlinks
 	page = wikipedia.page(pagetitle)
 	projectLinks = []
 	# externalLinks = []
