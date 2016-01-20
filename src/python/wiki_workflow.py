@@ -16,7 +16,9 @@ class WikiEnPage(object):
 		api.getviews()
 
 	def langlinks():
+		# https://www.mediawiki.org/wiki/API:Langlinks
 		# https://en.wikipedia.org/w/api.php?action=query&titles=Albert%20Einstein&prop=langlinks
+		# https://en.wikipedia.org/w/api.php?action=query&prop=langlinks&format=json&llprop=url&lllimit=max&indexpageids=&titles=Main%20Page
 		self._childrenOtherLanguages = [WikiPage(link) for link in db.get_langlinks(self.page)]
 
 	def views():
