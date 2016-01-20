@@ -62,11 +62,16 @@ def printPagesData(pages, limit=5):
 		if i > limit:
 			break
 
-def getMedicinePagesFromDump():
+def getMedicinePagesFromDump(limit=10):
 	pages = []
 	exceptions = []
-	with open('output/medicine_dump.txt', 'r') as dump:
+
+	path = os.path.dirname(os.path.abspath(__file__))
+
+	with open(os.path.join(path, 'output/medicine_dump.txt'), 'r') as dump:
 		for i, line in enumerate(dump.readlines()):
+			if i > limit:
+				break
 			# h = HTMLParser.HTMLParser()
 			# line = h.unescape(line).replace('/wiki/','').replace('%', '\%')
 			try:
@@ -78,7 +83,7 @@ def getMedicinePagesFromDump():
 	return pages, exceptions
 
 def getMedicinePageUrlsFromDump(limit=10):
-	pages, exceptions = getMedicinePagesFromDump()
+	pages, exceptions = getMedicinePagesFromDump(limit)
 	urls = {}
 	for i, page in enumerate(pages):
 		if i > limit:
