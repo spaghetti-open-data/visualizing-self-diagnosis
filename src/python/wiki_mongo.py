@@ -29,6 +29,7 @@ class MongoDbClient(object):
 		self.connection = MongoClient(self.host, self.port)
 		# print self.connection
 		db = self.connection[self.dbname]
+		print self.dbuser, self.dbpwd
 		db.authenticate(self.dbuser, self.dbpwd)
 		# print db
 		# the following should be managed via an additional switch, if necessary
