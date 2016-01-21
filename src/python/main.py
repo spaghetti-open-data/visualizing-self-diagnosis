@@ -1,4 +1,5 @@
 from wiki_languages import getLanglinks
+from wiki_projects import getProjectPages
 from wiki_mongo import MongoDbClient
 from sketches.wiki_medicine_pages_get import getMedicinePageUrlsFromDump
 import json
@@ -9,6 +10,7 @@ def getConfig():
 	with open('config/config.json') as jsonfile:    
 		data = json.load(jsonfile)
 	return data
+
 
 config = getConfig()['mongoDB']
 # print pformat(config)
@@ -23,7 +25,11 @@ mongo = MongoDbClient(
 
 # get all english pages for medicine
 limit = 20
-urls = getMedicinePageUrlsFromDump(limit)
+urls = getProjectPages(limit=20, cache=True)
+
+print urls
+
+# urls = getMedicinePageUrlsFromDump(limit)
 # test
 # urls = {
 # 	'1% rule (aviation medicine)': 'https://en.wikipedia.org/wiki/1%25_rule_(aviation_medicine)',
@@ -33,10 +39,10 @@ urls = getMedicinePageUrlsFromDump(limit)
 # }
 
 # for each page, get all translations
-for name, url in urls.items():
-	urlname = url.split('/wiki/')[-1]
-	print urlname
-	langdict = getLanglinks(urlname)
-	if langdict:
-		mongo.put(langdict)
-		print pformat(langdict)
+# for name, url in urls.items():
+# 	urlname = url.split('/wiki/')[-1]
+# 	print urlname
+# 	langdict = getLanglinks(urlname)
+# 	if langdict:
+# 		mongo.put(langdict)
+# 		print pformat(langdict)
