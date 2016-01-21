@@ -30,8 +30,7 @@ class WikiNode(object):
 		return self.views / n.views]
 
 
-class WikiLanguagePage(WikiEnPage):
+class WikiChildNode(WikiEnPage):
 
 	def __init__(pagename, parent=None):
 		self._parent = parent
-
