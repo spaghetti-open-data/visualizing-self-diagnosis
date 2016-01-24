@@ -48,3 +48,14 @@ class MongoDbClient(object):
 
 	def search(self, query):
 		return list(self.db.find(query))
+
+
+def getMongoClient(config):
+	return MongoDbClient(
+		config.get('server'),
+		config.get('port'),
+		config.get('username'),
+		config.get('password'),
+		config.get('db_name'),
+		config.get('collection')
+	)
