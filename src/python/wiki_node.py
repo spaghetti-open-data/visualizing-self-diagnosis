@@ -11,6 +11,7 @@ class WikiNode(object):
 	links = None	# []
 	exlinks = None		# []
 	language = 'en'
+	resolved = False
 
 	def __init__(self, pagename, parent=None):
 		self._parent = parent
@@ -20,7 +21,7 @@ class WikiNode(object):
 		# self.pagedata = api.getpagedata()
 		# self.views = api.getviews()
 
-	def asDict():
+	def asDict(self):
 		return {
 			'pageid': self.pageid,
 			'name': self.name,
@@ -29,18 +30,25 @@ class WikiNode(object):
 			'views': self.views,
 			'links': self.links,
 			'exlinks': self.exlinks,
-			'language': self.language
+			'language': self.language,
+			'resolved': self.resolved
 		}
 
 	def setPageData(self, pages=None):
-		page = wikipedia.page(self.name)
+		try:
+			page = wikipedia.page(self.name)
+		except:
+			print 'WARNING: page skipped: %s' % (self.name, )
+			return
+		self.resolved = True
 		projectLinks = []
 		externalLinks = []
 		for link in page.links:
 			if pages and link in pages:
-				projectLinks.append(link)
+				# projectLinks.append(link.encode('utf8'))
+				projectLinks.append(unicode(link))
 			else:
-				externalLinks.append(link)
+				externalLinks.append(unicode(link))
 		# data = {
 		# 	'title': page.title,
 		# 	'url': page.url,
@@ -49,8 +57,10 @@ class WikiNode(object):
 		# 	'exlinks': externalLinks
 		# }
 		# return data
-		self.title = page.title
-		self.url = page.url
+		# self.title = page.title.encode('utf8')
+		# self.url = page.url.encode('utf8')
+		self.title = unicode(page.title)
+		self.url = unicode(page.url)
 		self.pageid = page.pageid
 		self.links = projectLinks
 		self.exlinks = externalLinks
@@ -61,7 +71,7 @@ class WikiNode(object):
 		# https://en.wikipedia.org/w/api.php?action=query&prop=langlinks&format=json&llprop=url&lllimit=max&indexpageids=&titles=Main%20Page
 		self._childrenLanguages = [WikiPage(link) for link in db.get_langlinks(self.page)]
 
-	def views(self):
+	def getViews(self):
 		return 200
 
 	def weightedViews(self):

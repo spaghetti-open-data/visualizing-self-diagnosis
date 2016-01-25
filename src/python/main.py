@@ -37,9 +37,14 @@ def getPageLanguages(urls):
 		if langdict:
 			print pformat(langdict)
 
+limit = 20
 
 config = getConfig()['mongoDB']
-urls = getProjectPagesDictionary(10)
+medicinepages = getProjectPagesDictionary()
+medplist = medicinepages.keys()
+urls = {key: medicinepages[key] for key in medplist[:limit]}
+
+
 # urls = getMedicinePageUrlsFromDump(limit)
 # urls = {
 # 	'1% rule (aviation medicine)': 'https://en.wikipedia.org/wiki/1%25_rule_(aviation_medicine)',
@@ -49,18 +54,26 @@ urls = getProjectPagesDictionary(10)
 # }
 
 nodes = []
+mongo = getMongoClient(config)
 for name, url in urls.items():
 	pagenode = WikiNode(name)
-	pagenode.setPageData()
-	nodes.append(pagenode)
+	pagenode.setPageData(medplist)
 	# for each page, print all translations
 	# getPageLanguages(urls)
-	print pagenode.name, pagenode.url
-	print pagenode.url
-	print pagenode.pageid
-	print pagenode.links
-	print pagenode.exlinks
+	try:
+		print pagenode.name, pagenode.url
+		# print pagenode.url
+		# print pagenode.pageid
+		# print pagenode.links
+		# print pagenode.exlinks
+	except:
+		# this should catch our current error:
+		# 'ascii' codec can't encode character u'\u2013' ordinal not in range(128)
+		continue
+	# print pagenode.asDict(), type(pagenode.asDict())
+	nodes.append(pagenode)
+	if pagenode.resolved:
+		mongo.put(pagenode.asDict())
+
 # print pformat(nodes)
 
-# mongo = getMongoClient(config)
-# mongo.put(langdict)
