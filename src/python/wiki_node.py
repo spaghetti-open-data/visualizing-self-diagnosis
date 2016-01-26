@@ -30,8 +30,8 @@ class WikiNode(object):
 			'views': self.views,
 			'links': self.links,
 			'exlinks': self.exlinks,
-			'language': self.language,
-			'resolved': self.resolved
+			'language': self.language
+			# 'resolved': self.resolved
 		}
 
 	def setPageData(self, pages=None):

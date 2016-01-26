@@ -37,13 +37,11 @@ def getPageLanguages(urls):
 		if langdict:
 			print pformat(langdict)
 
-limit = 20
-
+limit = 50000
 config = getConfig()['mongoDB']
-medicinepages = getProjectPagesDictionary()
+medicinepages = getProjectPagesDictionary(limit)
 medplist = medicinepages.keys()
-urls = {key: medicinepages[key] for key in medplist[:limit]}
-
+# urls = {key: medicinepages[key] for key in medplist[:limit]}
 
 # urls = getMedicinePageUrlsFromDump(limit)
 # urls = {
@@ -55,7 +53,8 @@ urls = {key: medicinepages[key] for key in medplist[:limit]}
 
 nodes = []
 mongo = getMongoClient(config)
-for name, url in urls.items():
+# for name, url in urls.items():
+for name, url in medicinepages.items():
 	pagenode = WikiNode(name)
 	pagenode.setPageData(medplist)
 	# for each page, print all translations
@@ -76,4 +75,3 @@ for name, url in urls.items():
 		mongo.put(pagenode.asDict())
 
 # print pformat(nodes)
-
