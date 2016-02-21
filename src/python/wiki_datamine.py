@@ -1,3 +1,4 @@
+from wiki_api import WikiAPI
 from wiki_languages import getLanglinks
 from wiki_projects import getProjectPages
 from wiki_node import WikiNode
@@ -10,7 +11,6 @@ from pprint import pformat
 def getConfig():
 	with open('config/config.json') as jsonfile:    
 		data = json.load(jsonfile)
-	# print pformat(data)
 	return data
 
 def getProjectPagesDictionary(start=0, limit=100):
@@ -19,7 +19,6 @@ def getProjectPagesDictionary(start=0, limit=100):
 	urls = {}
 	for page in pages:
 		urls[page] = 'https://en.wikipedia.org/wiki/%s' % (page, )
-	# print pformat(urls)
 	return urls
 
 def getLanguageDictionary(url):
@@ -37,20 +36,59 @@ def getPageLanguages(urls):
 		if langdict:
 			print pformat(langdict)
 
-limit = 100
+
+start = 0
+limit = 50
 config = getConfig()['mongoDB']
-medicinepages = getProjectPagesDictionary(0, limit)
+medicinepages = getProjectPagesDictionary(start, limit)
 medplist = medicinepages.keys()
-# urls = {key: medicinepages[key] for key in medplist[:limit]}
 
-# urls = getMedicinePageUrlsFromDump(limit)
-# urls = {
-# 	'1% rule (aviation medicine)': 'https://en.wikipedia.org/wiki/1%25_rule_(aviation_medicine)',
-# 	# '1% rule (aviation medicine)': 'https://en.wikipedia.org/wiki/1%25 rule (aviation_medicine)',
-# 	'1,1,1,2-Tetrafluoroethane': 'https://en.wikipedia.org/wiki/1,1,1,2-Tetrafluoroethane',
-# 	'1,4-Dioxin': 'https://en.wikipedia.org/wiki/1,4-Dioxin'
-# }
 
+# print [url.split('/')[-1] for url in medicinepages.values()]
+titleslist = [url.split('/wiki/')[-1].replace(' ', '%20') for url in medicinepages.values()]
+# titleslist = ['Rome', 'Paris', 'London']
+api = WikiAPI()
+pagedata = api.getPages(titleslist, True)['pages']
+
+langpages = {}
+nodes = []
+for pageid, data in pagedata.items():
+	# WikiNode(pageid, data)
+	
+	# print pageid
+	# print data
+	if 'langlinks' in data.keys():
+		nlang = len(data['langlinks'])
+		for langdata in data['langlinks']:
+			key = langdata['lang']
+			if key not in langpages.keys():
+				langpages[key] = []
+			langpages[key].append((langdata['url'].split('/wiki/')[-1], pageid))
+			# print langdata
+	#	languages = [datum['url'].split('/wiki/')[-1] for datum in data['langlinks']]
+	# 	for i in range(nlang / 50 + 1):
+	# 		start = i * 50
+	# 		end = min(nlang, (i + 1) * 50 - 1)
+	# 		# print 'batch', nlang, ':', start, '-', end
+	# 		# print languages[start:end]
+	# 		languagepages = api.getPages(languages[start:end]).get('pages')
+	# 		print pformat(languagepages)
+	# 		break
+	# 		# print languages[start:end]
+	# 		if not languagepages:
+	# 			continue
+	# 		for langpageid, languagepage in languagepages.items():
+	# 			WikiNode(langpageid, languagepages, pageid)
+	# 		# api.getPagesById()
+
+	# break
+
+print pformat(langpages)
+
+# print pformat(pagedata)
+# print len(pagedata)
+
+'''
 nodes = []
 mongo = getMongoClient(config)
 # for name, url in urls.items():
@@ -74,5 +112,5 @@ for name, url in medicinepages.items():
 	if pagenode.resolved:
 		# mongo.put(pagenode.asDict())
 		pass
-
 # print pformat(nodes)
+'''

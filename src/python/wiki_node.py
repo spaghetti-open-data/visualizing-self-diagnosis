@@ -1,6 +1,9 @@
 import wikipedia
 
 
+from pprint import pformat
+
+
 class WikiNode(object):
 
 	pageid = -1
@@ -13,13 +16,27 @@ class WikiNode(object):
 	language = 'en'
 	resolved = False
 
-	def __init__(self, pagename, parent=None):
-		self._parent = parent
-		self.name = pagename
-		self.url = 'https://en.wikipedia.org/wiki/%s' % (pagename, )
-		self._childrenLanguages = []
-		# self.pagedata = api.getpagedata()
-		# self.views = api.getviews()
+	# def __init__(self, pagename, parent=None):
+	# 	self._parent = parent
+	# 	self.name = pagename
+	# 	self.url = 'https://en.wikipedia.org/wiki/%s' % (pagename, )
+	# 	self._childrenLanguages = []
+	# 	# self.pagedata = api.getpagedata()
+	# 	# self.views = api.getviews()
+
+	def __init__(self, idx, data, parent=None):
+		self.pageid = idx
+		self.language = data.get('pagelanguage')
+		# self._parent = parent
+		# self.name = data.get('fullurl').split('/wiki/')[-1]
+		self.title = data.get('pagetitle')
+		self.languages = None if 'langlinks' not in data.keys() else [datum['lang'] for datum in data['langlinks']]
+		self.parent = parent
+		print self.pageid, self.parent, self.language, self.name, self.title, self.languages
+		print pformat(data)
+		print data['fullurl']
+		# self.url = 'https://en.wikipedia.org/wiki/%s' % (pagename, )
+		# self._childrenLanguages = []
 
 	def asDict(self):
 		return {
