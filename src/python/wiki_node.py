@@ -1,7 +1,10 @@
 import wikipedia
 
-class WikiNode(object):
 
+from pprint import pformat
+
+
+class WikiNode(object):
 	pageid = -1
 	name = ''
 	title = ''
@@ -12,27 +15,57 @@ class WikiNode(object):
 	language = 'en'
 	resolved = False
 
-	def __init__(self, pagename, parent=None):
+	# def __init__(self, pagename, parent=None):
+	# 	self._parent = parent
+	# 	self.name = pagename
+	# 	self.url = 'https://en.wikipedia.org/wiki/%s' % (pagename, )
+	# 	self._childrenLanguages = []
+	# 	# self.pagedata = api.getpagedata()
+	# 	# self.views = api.getviews()
+
+	def __init__(self, idx, data, parent=-1):
 		super(WikiNode, self).__init__()
-		self._parent = parent
-		self.name = pagename
-		self.url = 'https://en.wikipedia.org/wiki/%s' % (pagename, )
-		self._childrenLanguages = []
-		self._views_client = _viewsApi.PageviewsClient()
-		# self.pagedata = api.getpagedata()
+		self.pageid = int(idx)
+		self.language = data.get('pagelanguage')
+		# self._parent = parent
+		self.name = data.get('fullurl').split('/wiki/')[-1]
+		# self.title = data.get('title').decode('utf-8')
+		self.title = data.get('title')
+		self.languages = None if 'langlinks' not in data.keys() else [datum['lang'] for datum in data['langlinks']]
+		self.parent = int(parent)
+		if 'links' in data.keys():
+			# print pformat(data.get('links'))
+			# print [datum['title'].encode('utf-8') for datum in data.get('links')]
+			self.links = [self.encodeUtf8(datum['title']) for datum in data.get('links')]
+
+		# print self.pageid, self.parent, self.language, self.name, self.title, self.languages
+		#print data['fullurl']
+		# print pformat(data)
+		# self.url = 'https://en.wikipedia.org/wiki/%s' % (pagename, )
+		# self._childrenLanguages = []
 
 	def asDict(self):
-		return {
-			'pageid': self.pageid,
+		nodeDict = {
+			'pid': self.pageid,
+			# 'parent': self.parent,
 			'name': self.name,
 			'title': self.title,
-			'url': self.url,
-			'views': self.views,
-			'links': self.links,
-			'exlinks': self.exlinks,
-			'language': self.language
+			# 'url': self.url,
+			# 'views': self.views,
+			# 'allinks': self.links,
+			# 'exlinks': self.exlinks,
+			'lang': self.language
 			# 'resolved': self.resolved
 		}
+		if self.parent > 0:
+			nodeDict['parent'] = self.parent
+		if self.links:
+			nodeDict['allinks'] = self.links
+
+		return nodeDict
+
+	def encodeUtf8(self, string):
+		return string.encode('utf-8')
 
 	def setPageData(self, pages=None):
 		try:

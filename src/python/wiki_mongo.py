@@ -37,14 +37,18 @@ class MongoDbClient(object):
 		# self.db = ?
 		self.db = db[self.collection]
 
-	def find(self, limit=0):
+	def find(self, kargs=None, limit=0):
 		if limit == 0:
+			if kargs:
+				return self.db.find(kargs)
 			return self.db.find()
 		else:
 			'''
 			for post in posts.find({'Longevity' : {"$gte" : 20, "$lte" : 100}}):
 				print search
 			'''
+			if kargs:
+				return self.db.find(kargs)[:limit]
 			return self.db.find()[:limit]
 
 	def search(self, query):

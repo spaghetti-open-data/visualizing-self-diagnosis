@@ -16,9 +16,9 @@ def getConfig():
 	# print pformat(data)
 	return data
 
-def getProjectPagesDictionary(limit=100):
+def getProjectPagesDictionary(start=0, limit=100):
 	# get all english pages for medicine
-	pages = getProjectPages(limit=limit, cache=True)
+	pages = getProjectPages(start=start, limit=limit, cache=True)
 	urls = {}
 	for page in pages:
 		urls[page] = 'https://en.wikipedia.org/wiki/%s' % (page, )
@@ -40,9 +40,11 @@ def getPageLanguages(urls):
 		if langdict:
 			print pformat(langdict)
 
-limit = 50000
+
+limit = 100
 config = getConfig()['mongoDB']
-medicinepages = getProjectPagesDictionary(limit)
+medicinepages = getProjectPagesDictionary(0, limit)
+
 medplist = medicinepages.keys()
 # urls = {key: medicinepages[key] for key in medplist[:limit]}
 
@@ -75,6 +77,7 @@ for name, url in medicinepages.items():
 	# print pagenode.asDict(), type(pagenode.asDict())
 	nodes.append(pagenode)
 	if pagenode.resolved:
-		mongo.put(pagenode.asDict())
+		# mongo.put(pagenode.asDict())
+		pass
 
 # print pformat(nodes)
