@@ -1,14 +1,17 @@
+import json
+import os
+from pprint import pformat
+
 from wiki_languages import getLanglinks
 from wiki_projects import getProjectPages
 from wiki_node import WikiNode
 from wiki_mongo import MongoDbClient, getMongoClient
 from sketches.wiki_medicine_pages_get import getMedicinePageUrlsFromDump
-import json
 
-from pprint import pformat
 
 def getConfig():
-	with open('config/config.json') as jsonfile:    
+	basedir = os.path.dirname(__file__)
+	with open(os.path.join(basedir, 'config/config.json')) as jsonfile:    
 		data = json.load(jsonfile)
 	# print pformat(data)
 	return data

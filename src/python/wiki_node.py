@@ -1,6 +1,5 @@
 import wikipedia
 
-
 class WikiNode(object):
 
 	pageid = -1
@@ -14,12 +13,13 @@ class WikiNode(object):
 	resolved = False
 
 	def __init__(self, pagename, parent=None):
+		super(WikiNode, self).__init__()
 		self._parent = parent
 		self.name = pagename
 		self.url = 'https://en.wikipedia.org/wiki/%s' % (pagename, )
 		self._childrenLanguages = []
+		self._views_client = _viewsApi.PageviewsClient()
 		# self.pagedata = api.getpagedata()
-		# self.views = api.getviews()
 
 	def asDict(self):
 		return {
@@ -71,9 +71,6 @@ class WikiNode(object):
 		# https://en.wikipedia.org/w/api.php?action=query&prop=langlinks&format=json&llprop=url&lllimit=max&indexpageids=&titles=Main%20Page
 		self._childrenLanguages = [WikiPage(link) for link in db.get_langlinks(self.page)]
 
-	def getViews(self):
-		return 200
-
 	def weightedViews(self):
 		weight = 1 / len(self._children)
 		childrenViews = [weight * n.views() for n in self._children]
@@ -83,4 +80,5 @@ class WikiNode(object):
 class WikiChildNode(WikiNode):
 
 	def __init__(self, pagename, parent=None):
+		super(WikiChildNode, self).__init__()
 		self._parent = parent

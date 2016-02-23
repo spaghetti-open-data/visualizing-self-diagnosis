@@ -10,6 +10,7 @@ from bson.objectid import ObjectId
 class MongoDbClient(object):
 
 	def __init__(self, host, port, user, dbpwd, dbname, collection):
+		super(MongoDbClient, self).__init__()
 		self.host = host
 		self.port = port
 		self.dbuser = user
