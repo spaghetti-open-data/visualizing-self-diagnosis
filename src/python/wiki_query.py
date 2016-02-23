@@ -36,14 +36,28 @@ def getPageLanguages(urls):
 		if langdict:
 			print pformat(langdict)
 
-# start = 0
+def encodeUtf8(string):
+	return string.encode('utf-8')
+
+start = 6100
 # limit = 50
 config = getConfig()['mongoDB']
 medicinepages = getProjectPagesDictionary(0, 0)
 
 npages = len(medicinepages)
 mongo = getMongoClient(config)
+
+# cursor = mongo.find(kargs={"language": "es"})
+# for document in cursor:
+# 	if document['parent'] > 0:
+# 		print document['parent'], document['language']
+
+dbCheck = True
+
+dumpfile = open('dump.log', 'w')
 for i in range(npages / 50 + 1):
+	if i < start / 50:
+		continue
 	langpages = {}
 	nodes = []
 	start = i * 50
@@ -56,12 +70,26 @@ for i in range(npages / 50 + 1):
 	api = WikiAPI()
 	pagedata = api.getPages(titleslist, True)['pages']
 	for pageid, data in pagedata.items():
+
+		data['title'] = encodeUtf8(data['title'])
+		data['fullurl'] = encodeUtf8(data['fullurl'])
+
+		# print data['title']
+		# cursor = mongo.find(kargs={"title": data['title'].encode('utf-8')})
+		if dbCheck and mongo.find(kargs={"title": data['title']}).count():
+			continue
+		elif dbCheck:
+			dbCheck = False
+
 		nodes.append(WikiNode(pageid, data))
+
+		# prepare language dictionary
 		# print pageid, print data
 		if 'langlinks' in data.keys():
 			nlang = len(data['langlinks'])
 			for langdata in data['langlinks']:
 				key = langdata['lang']
+				langdata['url'] = encodeUtf8(langdata['url'])
 				if key not in langpages.keys():
 					langpages[key] = {}
 				langpages[key][langdata['url'].split('/wiki/')[-1]] = pageid
@@ -77,44 +105,33 @@ for i in range(npages / 50 + 1):
 		# print titleslist
 		# print pformat(pagedata)
 		for langid, langdata in pagedata.items():
-			# print langid, langpages[lang][langdata['fullurl'].split('/wiki/')[-1]]
-			parentid = langpages[lang][langdata['fullurl'].split('/wiki/')[-1]]
+
+			langdata['title'] = encodeUtf8(langdata['title'])
+			langdata['fullurl'] = encodeUtf8(langdata['fullurl'])
+
+			# cursor = mongo.find(kargs={"title": langdata['title']})
+			# if cursor.count():
+			# 	continue
+			if dbCheck and mongo.find(kargs={"title": langdata['title']}).count():
+				continue
+			elif dbCheck:
+				dbCheck = False
+
+			# print langdata['fullurl'].split('/wiki/')[-1]
+			# print langid, pformat(langpages[lang])
+			langlinktitle = langdata['fullurl'].split('/wiki/')[-1]
+			if not langlinktitle in langpages[lang].keys():
+				warn = 'WARNING: %s skipped' % (langlinktitle, )
+				dumpfile.writelines('%s\n' % (warn, ))
+				print warn
+				continue
+			parentid = langpages[lang][langlinktitle]
 			nodes.append(WikiNode(langid, langdata, parentid))
 
-		break
 
 	print 'writing', len(nodes), 'nodes to db ( batch', start, '-', end, ')'
 	# print pformat(pagedata)
 	# print len(pagedata)
-
-	break
-
 	for pagenode in nodes:
 		# if pagenode.resolved:
 		mongo.put(pagenode.asDict())
-
-'''
-medplist = medicinepages.keys()
-nodes = []
-# for name, url in urls.items():
-for name, url in medicinepages.items():
-	pagenode = WikiNode(name)
-	# for each page, print all translations
-	# getPageLanguages(urls)
-	try:
-		print pagenode.name, pagenode.url
-		# print pagenode.url
-		# print pagenode.pageid
-		# print pagenode.links
-		# print pagenode.exlinks
-	except:
-		# this should catch our current error:
-		# 'ascii' codec can't encode character u'\u2013' ordinal not in range(128)
-		continue
-	# print pagenode.asDict(), type(pagenode.asDict())
-	nodes.append(pagenode)
-	if pagenode.resolved:
-		# mongo.put(pagenode.asDict())
-		pass
-# print pformat(nodes)
-'''

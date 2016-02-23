@@ -11,9 +11,10 @@ class WikiAPI(object):
 	def __init__(self):
 		pass
 
-	def getResponse(self, action):
-		url = '%s%s' % (self.root, action)
-		print url
+	def getResponse(self, action, lang='en'):
+		root = self.root.replace('en', lang)
+		url = '%s%s' % (root, action)
+		# print url
 		response = urllib2.urlopen(url)
 		try:
 			data = json.load(response)
@@ -32,14 +33,15 @@ class WikiAPI(object):
 	def filterTitleExceptions(self, titles):
 		result = []
 		for title in titles:
-			try:
-				print title
-				result.append(title)
-			except:
-				print 'WARNING: url skipped'
+			result.append(title.encode("utf-8"))
+			# try:
+			# 	print title.encode("utf-8")
+			# 	result.append(title.encode("utf-8"))
+			# except:
+			# 	print 'WARNING: url skipped'
 		return result
 
-	def getPages(self, titleslist, languages=False):
+	def getPages(self, titleslist, languages=False, lang='en'):
 		titlesQuery = '|'.join(self.filterTitleExceptions(titleslist))
 		langoption = '|langlinks&llprop=url&lllimit=max' if languages else ''
 		action = 'action=query&titles=%s&prop=info|links%s&format=json&inprop=url' % (titlesQuery, langoption)
@@ -51,7 +53,7 @@ class WikiAPI(object):
 		# prop=iwlinks		list=iwbacklinks 	
 		# prop=extlinks
 		# action = 'action=query&prop=revisions&rvprop=content&format=json&titles=Rome|London'
-		return self.getResponse(action)
+		return self.getResponse(action, lang)
 
 	def getPagesById(self, idslist, languages=False):
 		titlesQuery = '|'.join('%d' % idslist)

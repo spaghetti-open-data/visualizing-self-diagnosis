@@ -15,7 +15,7 @@ from wiki_medicine_pages_get import getMedicinePageUrlsFromDump
 from pprint import pformat
 
 
-limit = 2
+limit = 4
 urls = getMedicinePageUrlsFromDump(limit)
 # print pformat(urls)
 pageurls = [url.split('wikipedia.org/wiki/')[1] for url in urls.values()]

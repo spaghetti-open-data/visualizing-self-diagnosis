@@ -24,32 +24,48 @@ class WikiNode(object):
 	# 	# self.pagedata = api.getpagedata()
 	# 	# self.views = api.getviews()
 
-	def __init__(self, idx, data, parent=None):
-		self.pageid = idx
+	def __init__(self, idx, data, parent=-1):
+		self.pageid = int(idx)
 		self.language = data.get('pagelanguage')
 		# self._parent = parent
-		# self.name = data.get('fullurl').split('/wiki/')[-1]
-		self.title = data.get('pagetitle')
+		self.name = data.get('fullurl').split('/wiki/')[-1]
+		# self.title = data.get('title').decode('utf-8')
+		self.title = data.get('title')
 		self.languages = None if 'langlinks' not in data.keys() else [datum['lang'] for datum in data['langlinks']]
-		self.parent = parent
-		print self.pageid, self.parent, self.language, self.name, self.title, self.languages
-		print pformat(data)
-		print data['fullurl']
+		self.parent = int(parent)
+		if 'links' in data.keys():
+			# print pformat(data.get('links'))
+			# print [datum['title'].encode('utf-8') for datum in data.get('links')]
+			self.links = [self.encodeUtf8(datum['title']) for datum in data.get('links')]
+
+		# print self.pageid, self.parent, self.language, self.name, self.title, self.languages
+		#print data['fullurl']
+		# print pformat(data)
 		# self.url = 'https://en.wikipedia.org/wiki/%s' % (pagename, )
 		# self._childrenLanguages = []
 
 	def asDict(self):
-		return {
-			'pageid': self.pageid,
+		nodeDict = {
+			'pid': self.pageid,
+			# 'parent': self.parent,
 			'name': self.name,
 			'title': self.title,
-			'url': self.url,
-			'views': self.views,
-			'links': self.links,
-			'exlinks': self.exlinks,
-			'language': self.language
+			# 'url': self.url,
+			# 'views': self.views,
+			# 'allinks': self.links,
+			# 'exlinks': self.exlinks,
+			'lang': self.language
 			# 'resolved': self.resolved
 		}
+		if self.parent > 0:
+			nodeDict['parent'] = self.parent
+		if self.links:
+			nodeDict['allinks'] = self.links
+
+		return nodeDict
+
+	def encodeUtf8(self, string):
+		return string.encode('utf-8')
 
 	def setPageData(self, pages=None):
 		try:
