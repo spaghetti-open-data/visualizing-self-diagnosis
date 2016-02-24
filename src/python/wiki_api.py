@@ -1,7 +1,20 @@
+""" Script for collecting views data from Wikipedia.
+
+		Python requirements:
+			- pip pip install mwviews
+
+		References:
+			- https://github.com/mediawiki-utilities/python-mwviews
+"""
+
 import urllib2
 import json
 
+from mwviews.api import PageviewsClient
+
 from pprint import pformat
+
+# query pageviews (last month, all), sum. max query? mongo: write views (short + long)
 
 
 class WikiAPI(object):
@@ -24,22 +37,10 @@ class WikiAPI(object):
 			print 'response could not be json-decoded', url, response
 			return {}
 
-	def getPagesLanguages(self, titleslist):
-		titlesQuery = '|'.join(titleslist)
-		action = 'action=query&titles=%s&prop=langlinks&format=json&llprop=url&lllimit=max' % (titlesQuery, )
-		# action = 'action=query&prop=langlinks&format=json&llprop=url&lllimit=max&titles=%s' % (titlesQuery, )
-		# action = 'action=query&prop=langlinks&format=json&llprop=url&lllimit=max&indexpageids=&titles=%s' % (page, )
-		return self.getResponse(action)
-
 	def filterTitleExceptions(self, titles):
 		result = []
 		for title in titles:
 			result.append(title.encode("utf-8"))
-			# try:
-			# 	print title.encode("utf-8")
-			# 	result.append(title.encode("utf-8"))
-			# except:
-			# 	print 'WARNING: url skipped'
 		return result
 
 	def getPages(self, titleslist, languages=False, lang='en'):
@@ -53,8 +54,12 @@ class WikiAPI(object):
 		# prop=langlinks 	list=langbacklinks 	
 		# prop=iwlinks		list=iwbacklinks 	
 		# prop=extlinks
-		# action = 'action=query&prop=revisions&rvprop=content&format=json&titles=Rome|London'
 		return self.getResponse(action, lang)
+
+	def getPagesLanguages(self, titleslist):
+		titlesQuery = '|'.join(titleslist)
+		action = 'action=query&titles=%s&prop=langlinks&format=json&llprop=url&lllimit=max' % (titlesQuery, )
+		return self.getResponse(action)
 
 	def getPagesById(self, idslist, languages=False):
 		titlesQuery = '|'.join('%d' % idslist)
@@ -62,18 +67,5 @@ class WikiAPI(object):
 		action = 'action=query&pageids=%s&prop=info|links%s&format=json&llprop=url&lllimit=max' % (titlesQuery, langoption)
 		return self.getResponse(action)
 
-'''
-pageid = jsondict['pages'].keys()[0]
-if 'langlinks' in jsondict['pages'][pageid]:
-	links = jsondict['pages'][pageid]['langlinks']
-	langdict = {}
-	for link in links:
-		# lang = link['lang']
-		# url = link['url']
-		# print lang, url
-		langdict[link['lang']] = link['url']
-	# print pformat(jsondict)
-	# print pageid, links
-	# self._childrenOtherLanguages = [WikiPage(link) for link in db.get_langlinks(self.page)]
-	print langdict
-'''
+	def getPageviews(self, titles):
+		
