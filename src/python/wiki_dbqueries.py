@@ -13,4 +13,10 @@ def getConfig():
 
 config = getConfig()['mongoDB']
 mongo = getMongoClient(config)
-print mongo.db.distinct('lang')
+# get list of all languages stored in db
+# languages = mongo.db.distinct('lang')
+
+# cursor = mongo.find(kargs={"lang": "es"})
+# for document in cursor:
+# 	if document['parent'] > 0:
+# 		print document['parent'], document['language']
