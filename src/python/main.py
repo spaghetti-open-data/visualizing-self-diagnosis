@@ -64,20 +64,17 @@ for name, url in medicinepages.items():
 	pagenode.setPageData(medplist)
 	# for each page, print all translations
 	# getPageLanguages(urls)
-	try:
-		print pagenode.name, pagenode.url
-		# print pagenode.url
-		# print pagenode.pageid
-		# print pagenode.links
-		# print pagenode.exlinks
-	except:
-		# this should catch our current error:
-		# 'ascii' codec can't encode character u'\u2013' ordinal not in range(128)
-		continue
+	print pagenode.name, pagenode.url
 	# print pagenode.asDict(), type(pagenode.asDict())
 	nodes.append(pagenode)
 	if pagenode.resolved:
+<<<<<<< Updated upstream
 		# mongo.put(pagenode.asDict())
 		pass
+=======
+		print pagenode.asDict()
+		break
+		#mongo.put(pagenode.asDict())
+>>>>>>> Stashed changes
 
 # print pformat(nodes)
