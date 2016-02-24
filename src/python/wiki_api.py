@@ -68,4 +68,4 @@ class WikiAPI(object):
 		return self.getResponse(action)
 
 	def getPageviews(self, titles):
-		
+		print titles

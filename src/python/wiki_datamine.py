@@ -41,106 +41,83 @@ def getPageLanguages(urls):
 def encodeUtf8(string):
 	return string.encode('utf-8')
 
+def parseMediginePagesBatch(config, start=0, batchsize=50, dbCheck=True):	# limit = 50
+	medicinepages = getProjectPagesDictionary(0, 0)
+	npages = len(medicinepages)
+	print 'processing %d pages' % npages
+	mongo = getMongoClient(config)
 
-dbCheck = True
-start = 30524
-batchsize = 2
-# limit = 50
-config = getConfig()['mongoDB']
-
-
-
-medicinepages = getProjectPagesDictionary(0, 0)
-npages = len(medicinepages)
-print 'processing %d pages' % npages
-mongo = getMongoClient(config)
-
-# cursor = mongo.find(kargs={"language": "es"})
-# for document in cursor:
-# 	if document['parent'] > 0:
-# 		print document['parent'], document['language']
-
-dumpfile = open('dump.log', 'w')
-for i in range(npages / batchsize + 1):
-	if i < start / batchsize:
-		continue
-	langpages = {}
-	nodes = []
-	start = i * batchsize
-	end = min(npages, (i + 1) * batchsize - 1)
-	medicinepages = getProjectPagesDictionary(start, end)
-	# print medicinepages #[start:end]
-	# continue
-	titleslist = [url.split('/wiki/')[-1].replace(' ', '%20') for url in medicinepages.values()]
-	# titleslist = ['Rome', 'Paris', 'London']
 	api = WikiAPI()
-	pagedata = api.getPages(titleslist, True).get('pages')
-	if not pagedata:
-		print 'skipped', medicinepages
-		continue
-	for pageid, data in pagedata.items():
-
-		data['title'] = encodeUtf8(data['title'])
-		data['fullurl'] = encodeUtf8(data['fullurl'])
-
-		# print data['title']
-		# cursor = mongo.find(kargs={"title": data['title'].encode('utf-8')})
-		if dbCheck and mongo.find(kargs={"title": data['title']}).count():
+	for i in range(npages / batchsize + 1):
+		if i < start / batchsize:
 			continue
-		elif dbCheck:
-			dbCheck = False
-
-		nodes.append(WikiNode(pageid, data))
-
-		# prepare language dictionary
-		# print pageid, print data
-		if 'langlinks' in data.keys():
-			nlang = len(data['langlinks'])
-			for langdata in data['langlinks']:
-				key = langdata['lang']
-				langdata['url'] = encodeUtf8(langdata['url'])
-				if key not in langpages.keys():
-					langpages[key] = {}
-				langpages[key][langdata['url'].split('/wiki/')[-1]] = pageid
-				# print langdata
-
-	for lang, items in langpages.items():
-		# print lang
-		titleslist = items.keys()
-		# print len(titleslist)
-		pagedata = api.getPages(titleslist, lang=lang).get('pages')
+		langpages = {}
+		nodes = []
+		start = i * batchsize
+		end = min(npages, (i + 1) * batchsize - 1)
+		medicinepages = getProjectPagesDictionary(start, end)
+		# print medicinepages #[start:end]
+		titleslist = [url.split('/wiki/')[-1].replace(' ', '%20') for url in medicinepages.values()]
+		pagedata = api.getPages(titleslist, True).get('pages')
 		if not pagedata:
+			print 'skipped', medicinepages
 			continue
-		# print titleslist
-		# print pformat(pagedata)
-		for langid, langdata in pagedata.items():
+		for pageid, data in pagedata.items():
 
-			langdata['title'] = encodeUtf8(langdata['title'])
-			langdata['fullurl'] = encodeUtf8(langdata['fullurl'])
+			data['title'] = encodeUtf8(data['title'])
+			data['fullurl'] = encodeUtf8(data['fullurl'])
 
-			# cursor = mongo.find(kargs={"title": langdata['title']})
-			# if cursor.count():
-			# 	continue
-			if dbCheck and mongo.find(kargs={"title": langdata['title']}).count():
+			if dbCheck and mongo.find(kargs={"title": data['title']}).count():
 				continue
 			elif dbCheck:
 				dbCheck = False
 
-			# print langdata['fullurl'].split('/wiki/')[-1]
-			# print langid, pformat(langpages[lang])
-			langlinktitle = langdata['fullurl'].split('/wiki/')[-1]
-			if not langlinktitle in langpages[lang].keys():
-				warn = 'WARNING: %s skipped' % (langlinktitle, )
-				dumpfile.writelines('%s\n' % (warn, ))
-				print warn
+			nodes.append(WikiNode(pageid, data))
+
+			# prepare language dictionary
+			if 'langlinks' in data.keys():
+				nlang = len(data['langlinks'])
+				for langdata in data['langlinks']:
+					key = langdata['lang']
+					langdata['url'] = encodeUtf8(langdata['url'])
+					if key not in langpages.keys():
+						langpages[key] = {}
+					langpages[key][langdata['url'].split('/wiki/')[-1]] = pageid
+					# print langdata
+
+		for lang, items in langpages.items():
+			titleslist = items.keys()
+			pagedata = api.getPages(titleslist, lang=lang).get('pages')
+			if not pagedata:
 				continue
-			parentid = langpages[lang][langlinktitle]
-			nodes.append(WikiNode(langid, langdata, parentid))
 
+			for langid, langdata in pagedata.items():
+				langdata['title'] = encodeUtf8(langdata['title'])
+				langdata['fullurl'] = encodeUtf8(langdata['fullurl'])
 
-	print 'writing', len(nodes), 'nodes to db ( batch', start, '-', end, ')'
-	# print pformat(pagedata)
-	# print len(pagedata)
-	for pagenode in nodes:
-		# if pagenode.resolved:
-		mongo.put(pagenode.asDict())
+				if dbCheck and mongo.find(kargs={"title": langdata['title']}).count():
+					continue
+				elif dbCheck:
+					dbCheck = False
+
+				langlinktitle = langdata['fullurl'].split('/wiki/')[-1]
+				if not langlinktitle in langpages[lang].keys():
+					warn = 'WARNING: %s skipped' % (langlinktitle, )
+					print warn
+					continue
+				parentid = langpages[lang][langlinktitle]
+				nodes.append(WikiNode(langid, langdata, parentid))
+
+		print 'writing', len(nodes), 'nodes to db ( batch', start, '-', end, ')'
+		for pagenode in nodes:
+			# if pagenode.resolved:
+			mongo.put(pagenode.asDict())
+
+start = 30524
+batchsize = 2
+config = getConfig()
+dbconfig = config.get('mongoDB')
+# parseMediginePagesBatch(dbconfig, start=start, batchsize=batchsize)
+
+api = WikiAPI()
+api.getPageviews(['puppa'])
