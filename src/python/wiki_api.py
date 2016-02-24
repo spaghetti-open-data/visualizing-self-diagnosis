@@ -15,12 +15,13 @@ class WikiAPI(object):
 		root = self.root.replace('en', lang)
 		url = '%s%s' % (root, action)
 		# print url
-		response = urllib2.urlopen(url)
+		response = None
 		try:
+			response = urllib2.urlopen(url)
 			data = json.load(response)
 			return data['query']
 		except:
-			print 'response could not be json-decoded', response
+			print 'response could not be json-decoded', url, response
 			return {}
 
 	def getPagesLanguages(self, titleslist):

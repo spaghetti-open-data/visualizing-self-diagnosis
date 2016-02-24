@@ -39,7 +39,8 @@ def getPageLanguages(urls):
 def encodeUtf8(string):
 	return string.encode('utf-8')
 
-start = 6100
+start = 30524
+batchsize = 2
 # limit = 50
 config = getConfig()['mongoDB']
 medicinepages = getProjectPagesDictionary(0, 0)
@@ -47,28 +48,35 @@ medicinepages = getProjectPagesDictionary(0, 0)
 npages = len(medicinepages)
 mongo = getMongoClient(config)
 
+# writing 0 nodes to db ( batch 30500 - 30524 )
+# response could not be json-decoded
+
+
 # cursor = mongo.find(kargs={"language": "es"})
 # for document in cursor:
 # 	if document['parent'] > 0:
 # 		print document['parent'], document['language']
 
 dbCheck = True
-
+print npages
 dumpfile = open('dump.log', 'w')
-for i in range(npages / 50 + 1):
-	if i < start / 50:
+for i in range(npages / batchsize + 1):
+	if i < start / batchsize:
 		continue
 	langpages = {}
 	nodes = []
-	start = i * 50
-	end = min(npages, (i + 1) * 50 - 1)
+	start = i * batchsize
+	end = min(npages, (i + 1) * batchsize - 1)
 	medicinepages = getProjectPagesDictionary(start, end)
 	# print medicinepages #[start:end]
 	# continue
 	titleslist = [url.split('/wiki/')[-1].replace(' ', '%20') for url in medicinepages.values()]
 	# titleslist = ['Rome', 'Paris', 'London']
 	api = WikiAPI()
-	pagedata = api.getPages(titleslist, True)['pages']
+	pagedata = api.getPages(titleslist, True).get('pages')
+	if not pagedata:
+		print 'skipped', medicinepages
+		continue
 	for pageid, data in pagedata.items():
 
 		data['title'] = encodeUtf8(data['title'])
