@@ -75,7 +75,6 @@ class WikiAPI(object):
 	def getPageviews(self, pages, lang='en', limit=None):
 		titles = sorted(pages)
 		if limit and limit < len(titles):
-			print type(limit)
 			titles = titles[:limit]
 		print len(titles), '(subset of %d)' % len(pages)
 		with utils.timeIt('pageviews'):
