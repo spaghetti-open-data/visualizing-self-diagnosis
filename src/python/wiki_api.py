@@ -73,7 +73,7 @@ class WikiAPI(object):
 		return self.getResponse(action)
 
 	def getPageviews(self, pages, lang='en', limit=None):
-		if limit and limit > len(pages):
+		if limit and limit < len(pages):
 			pages = pages[:limit]
 		print len(pages)
 		titles = sorted(pages)
