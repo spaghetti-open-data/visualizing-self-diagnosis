@@ -9,8 +9,11 @@
 
 import urllib2
 import json
+import datetime
 
 from mwviews.api import PageviewsClient
+
+import utils
 
 from pprint import pformat
 
@@ -20,6 +23,8 @@ from pprint import pformat
 class WikiAPI(object):
 
 	root = 'https://en.wikipedia.org/w/api.php?'
+	mwbegin = datetime.date(2015, 8, 1) # '2015080100'
+
 	
 	def __init__(self):
 		pass
@@ -67,5 +72,29 @@ class WikiAPI(object):
 		action = 'action=query&pageids=%s&prop=info|links%s&format=json&llprop=url&lllimit=max' % (titlesQuery, langoption)
 		return self.getResponse(action)
 
-	def getPageviews(self, titles):
-		print titles
+	def getPageviews(self, pages, lang='en', limit=None):
+		if limit and limit > len(pages):
+			pages = pages[:limit]
+		print len(pages)
+		titles = sorted(pages)
+		with utils.timeIt('pageviews'):
+			viewsclient = PageviewsClient()
+			articleviews = viewsclient.article_views('%s.wikipedia' % (lang, ), titles, start=self.mwbegin)
+			print len(titles), 'titles,', len(articleviews), 'articleviews'
+			pagecounts = {}
+			# print pformat(dict(articleviews))
+			for time in sorted(articleviews):
+				stats = articleviews[time]
+				# print time, len(stats)
+				# print pformat(stats)
+				for title in titles:
+					if title not in pagecounts:
+						pagecounts[title] = []
+					pagecounts[title].append(int(stats.get(title) or 0))
+
+			for title, pageviews in pagecounts.items():
+				nviews = sum(pageviews)
+				pagecounts[title] = {'views': nviews}
+				if nviews:
+					pagecounts[title]['stats'] = pageviews
+		return pagecounts		

@@ -68,13 +68,9 @@ for name, url in medicinepages.items():
 	# print pagenode.asDict(), type(pagenode.asDict())
 	nodes.append(pagenode)
 	if pagenode.resolved:
-<<<<<<< Updated upstream
-		# mongo.put(pagenode.asDict())
 		pass
-=======
-		print pagenode.asDict()
-		break
-		#mongo.put(pagenode.asDict())
->>>>>>> Stashed changes
+		# mongo.put(pagenode.asDict())
+		# print pagenode.asDict()
+		# break
 
 # print pformat(nodes)

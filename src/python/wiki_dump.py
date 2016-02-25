@@ -21,7 +21,7 @@ def dump_language_links(mongo, limit=None):
 	""" Creates 1 dump file per language, with all links of that language.
 		The content is: page ID: page title (as in DB)
 	"""
-	language_path = os.path.join(DUMP_FOLDER, "medicine_%s.json")
+	language_path = os.path.join(DUMP_FOLDER, "dump_links_%s.json")
 	languages = get_languages()
 	for lang in languages:
 		links = mongo.find(kargs={"lang": lang}, limit=limit)

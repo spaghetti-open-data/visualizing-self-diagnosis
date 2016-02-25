@@ -15,6 +15,12 @@ def getConfig():
 		data = json.load(jsonfile)
 	return data
 
+def getLangJson(lang=None):
+	lang = lang or 'en'
+	with open('dump/medicine_%s.json' % (lang, )) as jsonfile:    
+		data = json.load(jsonfile)
+	return data
+
 def getProjectPagesDictionary(start=0, limit=100):
 	# get all english pages for medicine
 	pages = getProjectPages(start=start, end=limit, cache=True)
@@ -113,11 +119,14 @@ def parseMediginePagesBatch(config, start=0, batchsize=50, dbCheck=True):	# limi
 			# if pagenode.resolved:
 			mongo.put(pagenode.asDict())
 
-start = 30524
-batchsize = 2
-config = getConfig()
-dbconfig = config.get('mongoDB')
+# start = 30524
+# batchsize = 2
+# config = getConfig()
+# dbconfig = config.get('mongoDB')
 # parseMediginePagesBatch(dbconfig, start=start, batchsize=batchsize)
 
 api = WikiAPI()
-api.getPageviews(['puppa'])
+langpages = getLangJson()
+pageviews = api.getPageviews(langpages, limit=100)
+
+print pformat(pageviews)
