@@ -73,10 +73,11 @@ class WikiAPI(object):
 		return self.getResponse(action)
 
 	def getPageviews(self, pages, lang='en', limit=None):
-		if limit and limit < len(pages):
-			pages = pages[:limit]
-		print len(pages)
 		titles = sorted(pages)
+		if limit and limit < len(titles):
+			print type(limit)
+			titles = titles[:limit]
+		print len(titles), '(subset of %d)' % len(pages)
 		with utils.timeIt('pageviews'):
 			viewsclient = PageviewsClient()
 			articleviews = viewsclient.article_views('%s.wikipedia' % (lang, ), titles, start=self.mwbegin)
