@@ -4,6 +4,7 @@ import json
 import os
 
 import wiki_mongo
+import utils
 
 basedir = os.path.dirname(__file__)
 DUMP_FOLDER = os.path.join(basedir, "dump")
@@ -35,4 +36,5 @@ def test():
 		data = json.load(jsonfile)
 	config = data['mongoDB']
 	mongo = wiki_mongo.getMongoClient(config)
-	dump_language_links(mongo, 1000)
+	with utils.timeIt("query totalona"):
+		dump_language_links(mongo)
