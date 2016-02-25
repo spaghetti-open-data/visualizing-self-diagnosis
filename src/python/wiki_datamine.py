@@ -1,3 +1,5 @@
+import math
+
 from wiki_api import WikiAPI
 from wiki_languages import getLanglinks
 from wiki_projects import getProjectPages
@@ -126,7 +128,22 @@ def parseMediginePagesBatch(config, start=0, batchsize=50, dbCheck=True):	# limi
 # parseMediginePagesBatch(dbconfig, start=start, batchsize=batchsize)
 
 api = WikiAPI()
-langpages = getLangJson()
-pageviews = api.getPageviews(langpages, limit=100)
+langjson = getLangJson()
+langpages = [name for name, idx in langjson.items()]
+batchsize = 500
+npages = len(langpages)
+# for i in range(int(math.ceil(float(npages) / batchsize) + 1)):
+for i in range(npages / batchsize + 1):
+	start = i * batchsize
+	end = min(npages, (i + 1) * batchsize - 1)
+	if i < start / batchsize:
+		continue
+	querypages = langpages[start:end + 1]
+	print 'batch:', start, '-', end
+	# print querypages
+	pageviews = api.getPageviews(querypages)
+	# print pformat(pageviews)
+	print len(pageviews)
+	break
 
-print pformat(pageviews)
+

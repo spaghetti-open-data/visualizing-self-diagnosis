@@ -12,13 +12,18 @@
 		<div id="container"></div>
 		<script src="libs/sigmajs/sigma.min.js"></script>
 		<script src="libs/sigmajs/plugins/sigma.parsers.json.min.js"></script>
+		<script src="libs/sigmajs/plugins/sigma.layout.forceAtlas2.min.js"></script>
 		<script>
-			sigma.parsers.json('data/network.json', {
+			//sigma.parsers.json('data/network.json', {
+			sigma.parsers.json('data/wiki_sample_network.json', {
 				container: 'container',
 				settings: {
 					defaultNodeColor: '#ec5148'
 				}
+			}, function(s) {
+				s.startForceAtlas2()
 			});
+			// sigma.startForceAtlas2({worker: true, barnesHutOptimize: false});
 		</script>
 	</body>
 </html>

@@ -1,17 +1,17 @@
 {
 	"nodes": [
 		{
+			"x": 0,
 			"id": "n0",
 			"label": "A node",
-			"x": 0,
 			"y": 0,
 			"size": 3
 		},
 		{
 			"id": "n1",
-			"label": "Another node",
-			"x": 3,
 			"y": 1,
+			"x": 3,
+			"label": "Another node",
 			"size": 2
 		},
 		{
