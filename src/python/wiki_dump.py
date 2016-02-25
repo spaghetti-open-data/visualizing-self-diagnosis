@@ -19,13 +19,13 @@ def get_languages():
 
 def dump_language_links(mongo, limit=None):
 	""" Creates 1 dump file per language, with all links of that language.
-		The content is: page ID: page title (as in DB)
+		The content is: page ID: page name (as in DB)
 	"""
-	language_path = os.path.join(DUMP_FOLDER, "dump_links_%s.json")
+	language_path = os.path.join(DUMP_FOLDER, "medicine_%s.json")
 	languages = get_languages()
 	for lang in languages:
 		links = mongo.find(kargs={"lang": lang}, limit=limit)
-		links_dump = {link["title"]: link["pid"] for link in links}
+		links_dump = {link["name"]: link["pid"] for link in links}
 		with open(language_path % lang, "w") as my_file:
 			json.dump(links_dump, my_file)
 
@@ -38,3 +38,5 @@ def test():
 	mongo = wiki_mongo.getMongoClient(config)
 	with utils.timeIt("query totalona"):
 		dump_language_links(mongo)
+
+test()
