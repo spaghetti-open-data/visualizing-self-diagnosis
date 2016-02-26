@@ -131,7 +131,7 @@ dbconfig = config.get('mongoDB')
 api = WikiAPI()
 langjson = getLangJson(lang)
 langpages = [name for name, idx in langjson.items()]
-batchsize = 10
+batchsize = 20
 npages = len(langpages)
 # for i in range(int(math.ceil(float(npages) / batchsize) + 1)):
 for i in range(npages / batchsize + 1):
@@ -147,14 +147,16 @@ for i in range(npages / batchsize + 1):
 	print len(pageviews)
 	break
 
-mongo = getMongoClient	(dbconfig)
+mongo = getMongoClient(dbconfig)
 # print pageviews
 print pageviews.keys()
 # mongopages = mongo.find(kargs={'name': pageviews.keys()}) # 'lang': lang,
-mongopages = mongo.find(kargs={"lang": lang, "name": pageviews.keys()}, limit=10) #kargs={'name': pageviews.keys()} 'lang': lang,
+mongopages = mongo.find(kargs={"lang": lang, "name": {'$in': pageviews.keys()}}) #kargs={'name': pageviews.keys()} 'lang': lang,
 print mongopages, mongopages.count()
 for name, data in pageviews.items():
 	for i, page in enumerate(mongopages):
+		if 'allinks' in page:
+			print page.get('allinks')
 	# for i in xrange(mongopages.count()):
 		print i, type(page)
 	# print name
