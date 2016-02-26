@@ -54,6 +54,8 @@ class MongoDbClient(object):
 	def search(self, query):
 		return list(self.db.find(query))
 
+	def update(self, searchKwargs, newKwargs, multi=False):
+		self.db.update(searchKwargs, newKwargs, multi=multi)
 
 def getMongoClient(config):
 	return MongoDbClient(
