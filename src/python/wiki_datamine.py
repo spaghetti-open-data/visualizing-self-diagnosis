@@ -123,14 +123,15 @@ def parseMediginePagesBatch(config, start=0, batchsize=50, dbCheck=True):	# limi
 
 # start = 30524
 # batchsize = 2
-# config = getConfig()
-# dbconfig = config.get('mongoDB')
+lang='en'
+config = getConfig()
+dbconfig = config.get('mongoDB')
 # parseMediginePagesBatch(dbconfig, start=start, batchsize=batchsize)
 
 api = WikiAPI()
-langjson = getLangJson()
+langjson = getLangJson(lang)
 langpages = [name for name, idx in langjson.items()]
-batchsize = 500
+batchsize = 10
 npages = len(langpages)
 # for i in range(int(math.ceil(float(npages) / batchsize) + 1)):
 for i in range(npages / batchsize + 1):
@@ -146,4 +147,16 @@ for i in range(npages / batchsize + 1):
 	print len(pageviews)
 	break
 
+mongo = getMongoClient	(dbconfig)
+print pageviews
+print pageviews.keys()
+# mongopages = mongo.find(kargs={'name': pageviews.keys()}) # 'lang': lang,
+mongopages = mongo.find(kargs={'lang': 'es'}, limit=10) #kargs={'name': pageviews.keys()} 'lang': lang,
+print mongopages, mongopages.count()
+for name, data in pageviews.items():
+	for i in xrange(mongopages.count()):
+		page = mongopages[i]
+		print i, type(page)
+		break
+	# print name
 

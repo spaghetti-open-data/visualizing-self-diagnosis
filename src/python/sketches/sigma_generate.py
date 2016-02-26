@@ -21,7 +21,7 @@ sigmajson = {
 }
 # with open(os.path.join(dest, outjson), 'w') as outjsonfile:
 radius = 1
-limit = 230
+limit = 220
 k = sorted(data)[:limit]
 parser = HTMLParser.HTMLParser()
 for i, page in enumerate(k):
