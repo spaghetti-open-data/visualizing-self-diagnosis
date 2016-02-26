@@ -148,15 +148,14 @@ for i in range(npages / batchsize + 1):
 	break
 
 mongo = getMongoClient	(dbconfig)
-print pageviews
+# print pageviews
 print pageviews.keys()
 # mongopages = mongo.find(kargs={'name': pageviews.keys()}) # 'lang': lang,
-mongopages = mongo.find(kargs={'lang': 'es'}, limit=10) #kargs={'name': pageviews.keys()} 'lang': lang,
+mongopages = mongo.find(kargs={"lang": lang, "name": pageviews.keys()}, limit=10) #kargs={'name': pageviews.keys()} 'lang': lang,
 print mongopages, mongopages.count()
 for name, data in pageviews.items():
-	for i in xrange(mongopages.count()):
-		page = mongopages[i]
+	for i, page in enumerate(mongopages):
+	# for i in xrange(mongopages.count()):
 		print i, type(page)
-		break
 	# print name
 
