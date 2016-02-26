@@ -151,13 +151,32 @@ mongo = getMongoClient(dbconfig)
 # print pageviews
 print pageviews.keys()
 # mongopages = mongo.find(kargs={'name': pageviews.keys()}) # 'lang': lang,
-mongopages = mongo.find(kargs={"lang": lang, "name": {'$in': pageviews.keys()}}) #kargs={'name': pageviews.keys()} 'lang': lang,
-print mongopages, mongopages.count()
+pagescursor = mongo.find(kargs={"lang": lang, "name": {'$in': pageviews.keys()}}) #kargs={'name': pageviews.keys()} 'lang': lang,
+mongopages = {page.get('name'): page for page in pagescursor}
+print mongopages, pagescursor.count()
+
 for name, data in pageviews.items():
-	for i, page in enumerate(mongopages):
-		if 'allinks' in page:
-			print page.get('allinks')
-	# for i in xrange(mongopages.count()):
-		print i, type(page)
+
+	page = mongopages.get(name)
+	if not page:
+		print 'EXCEPTION:', name
+		continue
+
+	links = []
+	if 'allinks' in page:
+		for link in page.get('allinks'):
+			if link in langjson:
+				links.append(langjson.get(link, None))
+		# print links
+	if links:
+		page.pop('allinks')
+		page['links'] = links
+	
+	if 'stats' in data:
+		page['stats'] = data['stats']
+	if 'views' in data:
+		page['views'] = data['views']
+	# page[]
+	print pformat(page)
 	# print name
 
