@@ -30,7 +30,8 @@ class MongoDbClient(object):
 		self.connection = MongoClient(self.host, self.port)
 		# print self.connection
 		db = self.connection[self.dbname]
-		db.authenticate(self.dbuser, self.dbpwd)
+		if self.dbuser and self.dbpwd:
+			db.authenticate(self.dbuser, self.dbpwd)
 		# print self.dbuser, self.dbpwd, db
 		# the following should be managed via an additional switch, if necessary
 		# self.connection = MongoClient(self.dburi)
