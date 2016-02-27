@@ -17,6 +17,7 @@ def get_languages():
 			data = json.load(my_file)
 	return data
 
+
 def dump_language_links(mongo, limit=None):
 	""" Creates 1 dump file per language, with all links of that language.
 		The content is: page ID: page name (as in DB)
@@ -39,4 +40,3 @@ def test():
 	with utils.timeIt("query totalona"):
 		dump_language_links(mongo)
 
-test()

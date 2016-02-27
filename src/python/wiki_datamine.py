@@ -5,6 +5,8 @@ from wiki_languages import getLanglinks
 from wiki_projects import getProjectPages
 from wiki_node import WikiNode
 from wiki_mongo import MongoDbClient, getMongoClient
+from wiki_dump import get_languages
+import utils
 from sketches.wiki_medicine_pages_get import getMedicinePageUrlsFromDump
 import json
 
@@ -32,7 +34,7 @@ def getProjectPagesDictionary(start=0, limit=100):
 	return urls
 
 def getLanguageDictionary(url):
-	urlname = url.split('/wiki/')[-1].encode("utf-8")
+	urlname = url.split('/wiki/')[-1]
 	try:
 		print urlname
 	except:
@@ -123,60 +125,77 @@ def parseMediginePagesBatch(config, start=0, batchsize=50, dbCheck=True):	# limi
 
 # start = 30524
 # batchsize = 2
-lang='en'
+failed = []
+notFound = []
+batchsize = 200
 config = getConfig()
 dbconfig = config.get('mongoDB')
-# parseMediginePagesBatch(dbconfig, start=start, batchsize=batchsize)
-
 api = WikiAPI()
-langjson = getLangJson(lang)
-langpages = [name for name, idx in langjson.items()]
-batchsize = 20
-npages = len(langpages)
-# for i in range(int(math.ceil(float(npages) / batchsize) + 1)):
-for i in range(npages / batchsize + 1):
-	start = i * batchsize
-	end = min(npages, (i + 1) * batchsize - 1)
-	if i < start / batchsize:
-		continue
-	querypages = langpages[start:end + 1]
-	print 'batch:', start, '-', end
-	# print querypages
-	pageviews = api.getPageviews(querypages)
-	# print pformat(pageviews)
-	print len(pageviews)
-	break
-
 mongo = getMongoClient(dbconfig)
-# print pageviews
-print pageviews.keys()
-# mongopages = mongo.find(kargs={'name': pageviews.keys()}) # 'lang': lang,
-pagescursor = mongo.find(kargs={"lang": lang, "name": {'$in': pageviews.keys()}}) #kargs={'name': pageviews.keys()} 'lang': lang,
-mongopages = {page.get('name'): page for page in pagescursor}
-print mongopages, pagescursor.count()
 
-for name, data in pageviews.items():
+for lang in get_languages():
+	with utils.timeIt("query for %s" % lang):
+		try:
+			# parseMediginePagesBatch(dbconfig, start=start, batchsize=batchsize)
+			langjson = getLangJson(lang)
+			langpages = [name for name, idx in langjson.items()]
+			npages = len(langpages)
+			#print "npages:", npages
+			# for i in range(int(math.ceil(float(npages) / batchsize) + 1)):
+			for i in range(npages / batchsize + 1):
+				start = i * batchsize
+				end = min(npages, (i + 1) * batchsize - 1)
+				if i < start / batchsize:
+					continue
+				querypages = langpages[start:end + 1]
+				print 'batch:', start, '-', end
+				#print querypages
+				# print querypages
+				pageviews = api.getPageviews(querypages, lang=lang)
+				# print pformat(pageviews)
+				#print len(pageviews)
+				#break
 
-	page = mongopages.get(name)
-	if not page:
-		print 'EXCEPTION:', name
-		continue
+				# print pageviews
+				# print pageviews.keys()
+				# mongopages = mongo.find(kargs={'name': pageviews.keys()}) # 'lang': lang,
+				pagescursor = mongo.find(kargs={"lang": lang, "name": {'$in': pageviews.keys()}}) #kargs={'name': pageviews.keys()} 'lang': lang,
+				mongopages = {page.get('name'): page for page in pagescursor}
+				#print mongopages, pagescursor.count()
 
-	links = []
-	if 'allinks' in page:
-		for link in page.get('allinks'):
-			if link in langjson:
-				links.append(langjson.get(link, None))
-		# print links
-	if links:
-		page.pop('allinks')
-		page['links'] = links
-	
-	if 'stats' in data:
-		page['stats'] = data['stats']
-	if 'views' in data:
-		page['views'] = data['views']
-	# page[]
-	print pformat(page)
-	# print name
+				for name, data in pageviews.items():
 
+					page = mongopages.get(name)
+					if not page:
+						notFound.append(name)
+						#print 'EXCEPTION:', name
+						continue
+
+					links = []
+					for link in page.get('allinks', []):
+						if link in langjson:
+							links.append(langjson[link])
+					#print "links", links
+					if links:
+						page.pop('allinks')
+						page['links'] = links
+					
+					if 'stats' in data:
+						page['stats'] = data['stats']
+					if 'views' in data:
+						page['views'] = data['views']
+					mongo.update({"pid": page["pid"]}, page)
+					#print "updated", page["pid"]
+					# page[]
+					#print pformat(page)
+					# print name
+
+		except:
+			failed.append(lang)
+
+if notFound:
+	print "%d pages not found in pageviews:" % len(notFound)
+	print notFound
+if failed:
+	print "%d languages failed" % len(failed)
+	print failed

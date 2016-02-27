@@ -38,7 +38,7 @@ class MongoDbClient(object):
 		self.db = db[self.collection]
 
 	def find(self, kargs=None, limit=0):
-		if limit == 0:
+		if not limit:
 			if kargs:
 				return self.db.find(kargs)
 			return self.db.find()
@@ -55,6 +55,8 @@ class MongoDbClient(object):
 		return list(self.db.find(query))
 
 	def update(self, searchKwargs, newKwargs, multi=False):
+		if "_id" in newKwargs:
+			newKwargs.pop("_id")
 		self.db.update(searchKwargs, newKwargs, multi=multi)
 
 def getMongoClient(config):
