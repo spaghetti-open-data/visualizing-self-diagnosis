@@ -1,0 +1,3 @@
+TODO
+* query pageviews (last month, all), sum. max query? mongo: write views (short + long)
+* mongo: nodi con "alllinks" attribute, find id in dump, add to "links" attribute, remove "alllinks" attr

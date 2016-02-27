@@ -1,0 +1,6 @@
+
+_/
+src/python/sketches/output/
+
+*.pyc
+*.log
