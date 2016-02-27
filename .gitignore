@@ -1,6 +1,7 @@
 
 _/
 src/python/sketches/output/
-
+src/javascript/sketches/data/*
+src/python/config/config.json
 *.pyc
 *.log
