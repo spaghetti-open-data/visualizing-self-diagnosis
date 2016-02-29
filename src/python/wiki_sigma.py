@@ -38,7 +38,8 @@ for node in avgCursor:
 	break
 
 # gap = (vmax - vmin) / 5
-# print vmin, vmax, gap
+# print vmin, vmax, avg
+
 
 pages = mongo.find(
 	kargs={
