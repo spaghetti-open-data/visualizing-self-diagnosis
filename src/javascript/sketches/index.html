@@ -3,15 +3,26 @@
 		<style type="text/css">
 			html {
 				background: #303030; 
+				color: #c0c0c0;
+				font-family: sans-serif;
+			}
+			#sidebar {
+				width: 480px;
 			}
 			#container {
 				max-width: 98%;
-				height: 98%;
+				height: 100%;
 				margin: 0;
 			}
 		</style>
 	</head>
 	<body>
+		<div id="sidebar">
+			<h1>Wikipedia Medicine</h1>
+			<p>
+				Selecct the language to visualize the relative network:
+			</p>
+		</div>
 		<div id="container"></div>
 		<script src="libs/sigmajs/sigma.min.js"></script>
 		<script src="libs/sigmajs/plugins/sigma.parsers.json.min.js"></script>

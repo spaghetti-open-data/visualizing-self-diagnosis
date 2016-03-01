@@ -1,0 +1,10 @@
+{
+	"mongoDB": {
+		"server": "ds12345.mongolab.com",
+		"port": 12345,
+		"db_name": "opencare",
+		"username": "opencare_usr",
+		"password": "opencare_pwd",
+		"collection": "wikinodes"
+	}
+}
