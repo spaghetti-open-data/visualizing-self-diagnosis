@@ -23,12 +23,14 @@ lang='en'
 config = getConfig()
 dbconfig = config.get('mongoDB')
 mongo = getMongoClient(dbconfig)
-dest = 'C:\\Users\\Stefan\\Documents\\GitHub\\futuroanteriore\\visualizing-self-diagnosis\\src\\javascript\\sketches\\data'
+
+basedir = os.path.dirname(__file__)
+dest = os.path.join(basedir, '..', 'javascript','sketches', 'data')
 outjson = 'wiki_sample_network.json'
-rawpath = 'C:\\Users\\Stefan\\Documents\\GitHub\\futuroanteriore\\visualizing-self-diagnosis\\src\\python\\dump\\medicine_en.json'
+rawpath = os.path.join(basedir, 'dump', 'medicine_en.json')
 
 radius = 1
-limit = 220
+
 vmin = mongo.db.find_one({"views": {"$gt": 0}}, sort=[("views", 1)])["views"]
 vmax = mongo.db.find_one({"views": {"$gt": 0}}, sort=[("views", -1)])["views"]
 # avg = mongo.db.find_one({"views": {"$avg": True}})
@@ -52,13 +54,19 @@ pages = mongo.find(
 		}
 	} #, limit=100
 )
-
+limit = pages.count()
 sigmajson = {
 	'nodes': [],
 	'edges': []
 }
 # parser = HTMLParser.HTMLParser()
+parsed_ids = []
+sigma_links = {}
 for i, page in enumerate(pages):
+	if page['pid'] in parsed_ids:
+		print "Skipped duplicate:", page['pid']
+		continue
+	parsed_ids.append(page['pid'])
 	views = page['views']
 	radius = 1
 	if views < avg:
@@ -67,13 +75,7 @@ for i, page in enumerate(pages):
 		radius += int(lerp(views, avg, vmax) * 4)
 	# print page['views'], radius
 	if 'links' in page.keys():
-		for j, link in enumerate(page['links']):
-			edge = {
-				'id': '%de%d' % (j, page['pid']),
-				'source': '%d' % page['pid'],
-				'target': '%d' % link
-			}
-			sigmajson['edges'].append(edge)
+		sigma_links[page['pid']] = page['links']
 	node = {
 		'id': '%d' % page['pid'],
 		'label': page['title'], # parser.unescape(page),
@@ -82,6 +84,16 @@ for i, page in enumerate(pages):
 		'size': radius
 	}
 	sigmajson['nodes'].append(node)
+
+for pid, links in sigma_links.iteritems():
+	for j, link in enumerate(links):
+		if link in parsed_ids:
+			edge = {
+				'id': '%de%d' % (j, pid),
+				'source': '%d' % pid,
+				'target': '%d' % link
+			}
+			sigmajson['edges'].append(edge)
 
 with open(os.path.join(dest, outjson), 'w') as outjsonfile:
 	json.dump(sigmajson, outjsonfile, indent=1)

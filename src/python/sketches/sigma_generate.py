@@ -1,17 +1,18 @@
+import codecs
 import os
 import json
 import math
 import random
 import HTMLParser
 
-
-dest = 'C:\\Users\\Stefan\\Documents\\GitHub\\futuroanteriore\\visualizing-self-diagnosis\\src\\javascript\\sketches\\data'
+basedir = os.path.dirname(__file__)
+dest = os.path.join(basedir, '..', '..', 'javascript','sketches', 'data')
 outjson = 'wiki_sample_network.json'
 
-rawpath = 'C:\\Users\\Stefan\\Documents\\GitHub\\futuroanteriore\\visualizing-self-diagnosis\\src\\python\\dump\\medicine_en.json'
+rawpath = os.path.join(basedir, '..', 'dump', 'medicine_en.json')
 
 
-with open(rawpath, 'r') as rawjson:
+with codecs.open(rawpath, encoding='utf-8') as rawjson:
 	data = json.load(rawjson)
 
 
@@ -24,9 +25,14 @@ radius = 1
 limit = 220
 k = sorted(data)[:limit]
 parser = HTMLParser.HTMLParser()
+parsed_ids = []
 for i, page in enumerate(k):
 	radius += float(1)/len(k)
 	idx = data[page]
+	if idx in parsed_ids:
+		print "Skipped duplicate:", idx
+		continue
+	parsed_ids.append(idx)
 	keys = random.sample(k, min(limit, max(0, random.randint(-3, 3))))
 	# [52, 3, 10, 92, 86, 42, 99, 73, 56, 23]
 	values = [data[key] for key in keys]
